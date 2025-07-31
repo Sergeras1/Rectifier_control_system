@@ -106,9 +106,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, 100);
-		valueADC = HAL_ADC_GetValue(&hadc1);
+	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC, sizeof(valueADC));
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
