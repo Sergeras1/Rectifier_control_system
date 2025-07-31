@@ -46,9 +46,9 @@ DMA_HandleTypeDef hdma_adc1;
 /* USER CODE BEGIN PV */
 
 /*Пременные для результатов ADC*/
-uint32_t valueADC_ch1 = 0;
-uint32_t valueADC_ch2 = 0;
-uint32_t valueADC_ch3 = 0;
+uint16_t valueADC_ch1 = 0;
+uint16_t valueADC_ch2 = 0;
+uint16_t valueADC_ch3 = 0;
 /*----------------------------*/
 
 /* USER CODE END PV */
@@ -75,9 +75,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	HAL_ADC_Start_DMA(&hadc1, &valueADC_ch1, sizeof(valueADC_ch1));
-	HAL_ADC_Start_DMA(&hadc1, &valueADC_ch2, sizeof(valueADC_ch2));
-	HAL_ADC_Start_DMA(&hadc1, &valueADC_ch3, sizeof(valueADC_ch3));
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -109,7 +106,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+		HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch1, sizeof(valueADC_ch1));
+		HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch2, sizeof(valueADC_ch2));
+		HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch3, sizeof(valueADC_ch3));
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
