@@ -9,7 +9,7 @@
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1037:19:HAL_ADC_Start_IT	24	static
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1162:19:HAL_ADC_Stop_IT	16	static
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1199:6:HAL_ADC_IRQHandler	32	static
-../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1364:19:HAL_ADC_Start_DMA	40	static
+../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1364:19:HAL_ADC_Start_DMA	32	static
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1512:19:HAL_ADC_Stop_DMA	24	static
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1568:10:HAL_ADC_GetValue	16	static
 ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c:1580:13:HAL_ADC_ConvCpltCallback	16	static
