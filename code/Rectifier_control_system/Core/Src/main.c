@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "string.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -107,8 +107,6 @@ int main(void)
 	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch[0], ADC_CHANNELS_NUM);
 	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch[1], ADC_CHANNELS_NUM);
 	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch[2], ADC_CHANNELS_NUM);
-
-	  memset(valueADC_ch, 0, sizeof(valueADC_ch));
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -179,6 +177,7 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
+  ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
   ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
@@ -200,6 +199,17 @@ static void MX_ADC1_Init(void)
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure the analog watchdog
+  */
+  AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
+  AnalogWDGConfig.HighThreshold = 2230;
+  AnalogWDGConfig.LowThreshold = 2130;
+  AnalogWDGConfig.ITMode = DISABLE;
+  if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -286,7 +296,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc1){
+	if(hadc1->Instance == ADC1){
+		if(valueADC_ch[0] >= 2230){
+			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, 1);
+		}
+		else if(valueADC_ch[0] <= 2130){
+			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, 0);
+		}
+	}
+}
 /* USER CODE END 4 */
 
 /**
