@@ -96,7 +96,7 @@ int main(void)
   MX_DMA_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch, ADC_CHANNELS_NUM);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,9 +104,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch[0], ADC_CHANNELS_NUM);
-	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch[1], ADC_CHANNELS_NUM);
-	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch[2], ADC_CHANNELS_NUM);
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -190,13 +188,13 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ENABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 3;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
@@ -208,7 +206,7 @@ static void MX_ADC1_Init(void)
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
   AnalogWDGConfig.HighThreshold = 2230;
   AnalogWDGConfig.LowThreshold = 2130;
-  AnalogWDGConfig.ITMode = DISABLE;
+  AnalogWDGConfig.ITMode = ENABLE;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
     Error_Handler();
@@ -299,10 +297,10 @@ static void MX_GPIO_Init(void)
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc1){
 	if(hadc1->Instance == ADC1){
 		if(valueADC_ch[0] >= 2230){
-			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, 1);
+			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_5, 1);
 		}
 		else if(valueADC_ch[0] <= 2130){
-			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, 0);
+			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_5, 0);
 		}
 	}
 }
