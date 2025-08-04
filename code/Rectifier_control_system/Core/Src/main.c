@@ -204,8 +204,8 @@ static void MX_ADC1_Init(void)
   /** Configure the analog watchdog
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
-  AnalogWDGConfig.HighThreshold = 2230;
-  AnalogWDGConfig.LowThreshold = 2130;
+  AnalogWDGConfig.HighThreshold = 2194;
+  AnalogWDGConfig.LowThreshold = 2104;
   AnalogWDGConfig.ITMode = ENABLE;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
@@ -216,7 +216,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_56CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -274,19 +274,29 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PF1 PF3 PF5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_5;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PB13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA8 PA9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -294,15 +304,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc1){
-	if(hadc1->Instance == ADC1){
-		if(valueADC_ch[0] >= 2230){
-			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_5, 1);
-		}
-		else if(valueADC_ch[0] <= 2130){
-			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_5, 0);
-		}
-	}
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc){
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
 }
 /* USER CODE END 4 */
 
