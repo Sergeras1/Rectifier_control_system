@@ -3,5 +3,5 @@
 ../Core/Src/main.c:172:13:MX_ADC1_Init	6
 ../Core/Src/main.c:251:13:MX_DMA_Init	1
 ../Core/Src/main.c:269:13:MX_GPIO_Init	1
-../Core/Src/main.c:307:6:HAL_ADC_LevelOutOfWindowCallback	5
-../Core/Src/main.c:328:6:Error_Handler	1
+../Core/Src/main.c:307:6:HAL_ADC_LevelOutOfWindowCallback	15
+../Core/Src/main.c:341:6:Error_Handler	1

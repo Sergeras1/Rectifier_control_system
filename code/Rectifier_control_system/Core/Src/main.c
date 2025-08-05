@@ -308,13 +308,26 @@ void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1) {
         if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
 
-            if (valueADC_ch[0] >= AnalogWDGConfig.HighThreshold) {
+            if (valueADC_ch[0] >= AnalogWDGConfig.HighThreshold ||
+            	valueADC_ch[1] >= AnalogWDGConfig.HighThreshold ||
+				valueADC_ch[2] >= AnalogWDGConfig.HighThreshold) {
+            	if(valueADC_ch[0] >= AnalogWDGConfig.HighThreshold)
                 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
+            	else if (valueADC_ch[1] >= AnalogWDGConfig.HighThreshold)
+            	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
+            	else if (valueADC_ch[2] >= AnalogWDGConfig.HighThreshold)
+            	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 0);
             }
-            else if (valueADC_ch[0] <= AnalogWDGConfig.LowThreshold) {
-                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
-            }
-
+            else if (valueADC_ch[0] <= AnalogWDGConfig.HighThreshold ||
+            		 valueADC_ch[1] <= AnalogWDGConfig.HighThreshold ||
+					 valueADC_ch[2] <= AnalogWDGConfig.HighThreshold) {
+					if(valueADC_ch[0] <= AnalogWDGConfig.HighThreshold)
+					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
+					else if (valueADC_ch[1] <= AnalogWDGConfig.HighThreshold)
+					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
+					else if (valueADC_ch[2] <= AnalogWDGConfig.HighThreshold)
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 1);
+            	}
             __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
         }
     }
