@@ -1,7 +1,7 @@
-../Core/Src/main.c:72:5:main	8	static
-../Core/Src/main.c:117:6:SystemClock_Config	88	static
-../Core/Src/main.c:171:13:MX_ADC1_Init	48	static
-../Core/Src/main.c:251:13:MX_DMA_Init	16	static
-../Core/Src/main.c:269:13:MX_GPIO_Init	40	static
-../Core/Src/main.c:307:6:HAL_ADC_LevelOutOfWindowCallback	16	static
-../Core/Src/main.c:316:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:73:5:main	8	static
+../Core/Src/main.c:118:6:SystemClock_Config	88	static
+../Core/Src/main.c:172:13:MX_ADC1_Init	24	static
+../Core/Src/main.c:252:13:MX_DMA_Init	16	static
+../Core/Src/main.c:270:13:MX_GPIO_Init	40	static
+../Core/Src/main.c:308:6:HAL_ADC_LevelOutOfWindowCallback	24	static
+../Core/Src/main.c:330:6:Error_Handler	4	static,ignoring_inline_asm

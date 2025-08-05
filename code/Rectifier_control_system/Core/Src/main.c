@@ -48,6 +48,7 @@ DMA_HandleTypeDef hdma_adc1;
 /*Пременные для результатов ADC*/
 uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,};
 /*----------------------------*/
+ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
 
 /* USER CODE END PV */
 
@@ -175,7 +176,7 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
-  ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
+
   ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
@@ -304,8 +305,21 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc){
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
+    if (hadc == &hadc1) {
+        if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
+            uint32_t currentValue = valueADC_ch[0];
+
+            if (currentValue >= AnalogWDGConfig.HighThreshold) {
+                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
+            }
+            else if (currentValue <= AnalogWDGConfig.LowThreshold) {
+                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
+            }
+
+            __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
+        }
+    }
 }
 /* USER CODE END 4 */
 
