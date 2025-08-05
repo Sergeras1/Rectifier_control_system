@@ -176,7 +176,6 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
-
   ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
@@ -205,8 +204,8 @@ static void MX_ADC1_Init(void)
   /** Configure the analog watchdog
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
-  AnalogWDGConfig.HighThreshold = 2194;
-  AnalogWDGConfig.LowThreshold = 2104;
+  AnalogWDGConfig.HighThreshold = 2200;
+  AnalogWDGConfig.LowThreshold = 2390;
   AnalogWDGConfig.ITMode = ENABLE;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
@@ -217,7 +216,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_56CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -308,12 +307,11 @@ static void MX_GPIO_Init(void)
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1) {
         if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
-            uint32_t currentValue = valueADC_ch[0];
 
-            if (currentValue >= AnalogWDGConfig.HighThreshold) {
+            if (valueADC_ch[0] >= AnalogWDGConfig.HighThreshold) {
                 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
             }
-            else if (currentValue <= AnalogWDGConfig.LowThreshold) {
+            else if (valueADC_ch[0] <= AnalogWDGConfig.LowThreshold) {
                 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
             }
 
