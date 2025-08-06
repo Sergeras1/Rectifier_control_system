@@ -1,9 +1,3 @@
-/*
- * adc.c
- *
- *  Created on: Aug 6, 2025
- *      Author: sbalbashov
- */
 #include "adc.h"
 
 uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,};
