@@ -305,31 +305,30 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
-    if (hadc == &hadc1) {
-        if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
-
-            if (valueADC_ch[0] >= AnalogWDGConfig.HighThreshold ||
-            	valueADC_ch[1] >= AnalogWDGConfig.HighThreshold ||
-				valueADC_ch[2] >= AnalogWDGConfig.HighThreshold) {
-            	if(valueADC_ch[0] >= AnalogWDGConfig.HighThreshold)
-                HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
-            	else if (valueADC_ch[1] >= AnalogWDGConfig.HighThreshold)
-            	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
-            	else if (valueADC_ch[2] >= AnalogWDGConfig.HighThreshold)
-            	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 0);
-            }
-            else if (valueADC_ch[0] <= AnalogWDGConfig.HighThreshold ||
-            		 valueADC_ch[1] <= AnalogWDGConfig.HighThreshold ||
-					 valueADC_ch[2] <= AnalogWDGConfig.HighThreshold) {
-					if(valueADC_ch[0] <= AnalogWDGConfig.HighThreshold)
-					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
-					else if (valueADC_ch[1] <= AnalogWDGConfig.HighThreshold)
-					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
-					else if (valueADC_ch[2] <= AnalogWDGConfig.HighThreshold)
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 1);
-            	}
+    if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
+        	for (int i = 0; i < sizeof(valueADC_ch) / sizeof(valueADC_ch[0]); ++i) {
+        		if (valueADC_ch[i] >= AnalogWDGConfig.HighThreshold) {
+        			switch(i) {
+        			case 0: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
+        				break;
+        			case 1: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
+        				break;
+        			case 2: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 0);
+        				break;
+        			}
+        		}
+        		else if (valueADC_ch[i] <= AnalogWDGConfig.LowThreshold) {
+        			switch(i) {
+        			case 0: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
+        				break;
+        			case 1: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
+        				break;
+        			case 2: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 1);
+        				break;
+        			}
+        		}
+        	}
             __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
-        }
     }
 }
 /* USER CODE END 4 */
