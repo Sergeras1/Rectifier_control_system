@@ -1,7 +1,5 @@
-../Core/Src/main.c:73:5:main	1
-../Core/Src/main.c:118:6:SystemClock_Config	4
-../Core/Src/main.c:172:13:MX_ADC1_Init	6
-../Core/Src/main.c:251:13:MX_DMA_Init	1
-../Core/Src/main.c:269:13:MX_GPIO_Init	1
-../Core/Src/main.c:307:6:HAL_ADC_LevelOutOfWindowCallback	15
-../Core/Src/main.c:341:6:Error_Handler	1
+../Core/Src/main.c:65:5:main	1
+../Core/Src/main.c:110:6:SystemClock_Config	4
+../Core/Src/main.c:162:13:MX_DMA_Init	1
+../Core/Src/main.c:180:13:MX_GPIO_Init	1
+../Core/Src/main.c:218:6:HAL_ADC_LevelOutOfWindowCallback	3
