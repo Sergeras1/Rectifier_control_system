@@ -5,8 +5,8 @@
  *      Author: sbalbashov
  */
 
-#ifndef INC_ADC_H_
-#define INC_ADC_H_
+#ifndef INC_ADCINIT_H_
+#define INC_ADCINIT_H_
 /* Includes ----------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 
@@ -23,4 +23,4 @@ extern ADC_AnalogWDGConfTypeDef AnalogWDGConfig;
 extern void MX_ADC1_Init(void);
 extern void checkChanelns(uint16_t* valueADC_ch, uint16_t size);
 
-#endif /* INC_ADC_H_ */
+#endif /* INC_ADCINIT_H_ */
