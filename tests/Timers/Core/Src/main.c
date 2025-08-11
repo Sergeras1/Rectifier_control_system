@@ -22,7 +22,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "timer_utils.h"
-#include "stdbool.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,10 +44,13 @@ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
 TIM_HandleTypeDef htim1;
+DMA_HandleTypeDef hdma_tim1_ch1;
+DMA_HandleTypeDef hdma_tim1_ch2;
 
 /* USER CODE BEGIN PV */
-uint32_t period;
-uint32_t pulseWidth;
+static uint32_t period = 0;
+static uint32_t pulseWidth = 0;
+uint32_t counterMAX;
 uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,};
 ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
 /* USER CODE END PV */
@@ -101,11 +103,12 @@ int main(void)
   MX_TIM1_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
- // HAL_TIM_Base_Start_IT(&htim1);
-  //HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
-  //HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch, ADC_CHANNELS_NUM);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 7999); // Записываем значение в регистр сравнения
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -184,6 +187,7 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
+  ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
   ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
@@ -267,8 +271,7 @@ static void MX_TIM1_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM1_Init 1 */
 
@@ -289,7 +292,7 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_OC_Init(&htim1) != HAL_OK)
+  if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -299,37 +302,23 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_TIMING;
-  sConfigOC.Pulse = 8999;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 11999;
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN TIM1_Init 2 */
 
   /* USER CODE END TIM1_Init 2 */
-  HAL_TIM_MspPostInit(&htim1);
 
 }
 
@@ -346,6 +335,12 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  /* DMA2_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
 }
 
@@ -394,25 +389,22 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/*void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim){
 	if(htim->Instance == TIM1){
-		if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 1);
-		}
-		else if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 0);
-		}
-
-
+		period = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1);
+		pulseWidth = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_2);
 	}
-}*/
+}
 
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
+	uint32_t R_CmpAB = 0;
     if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
     		if (valueADC_ch[0] >= AnalogWDGConfig.HighThreshold
     				|| valueADC_ch[0] <= AnalogWDGConfig.LowThreshold) {
     			reset_timer(&htim1);
     		}
+    		R_CmpAB = __HAL_TIM_GET_COMPARE(&htim1, TIM_CHANNEL_1);
             __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
     }
 }
