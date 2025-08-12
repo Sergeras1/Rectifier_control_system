@@ -1,9 +1,8 @@
-../Core/Src/main.c:72:5:main	1
-../Core/Src/main.c:125:6:SystemClock_Config	4
-../Core/Src/main.c:179:13:MX_ADC1_Init	6
-../Core/Src/main.c:260:13:MX_TIM1_Init	8
-../Core/Src/main.c:338:13:MX_DMA_Init	1
-../Core/Src/main.c:356:13:MX_GPIO_Init	1
-../Core/Src/main.c:397:6:HAL_ADC_LevelOutOfWindowCallback	5
-../Core/Src/main.c:406:6:HAL_TIM_PWM_PulseFinishedCallback	2
-../Core/Src/main.c:417:6:Error_Handler	1
+../Core/Src/main.c:71:5:main	1
+../Core/Src/main.c:122:6:SystemClock_Config	4
+../Core/Src/main.c:176:13:MX_ADC1_Init	6
+../Core/Src/main.c:257:13:MX_TIM1_Init	8
+../Core/Src/main.c:334:13:MX_DMA_Init	1
+../Core/Src/main.c:352:13:MX_GPIO_Init	1
+../Core/Src/main.c:401:6:HAL_TIM_OC_DelayElapsedCallback	3
+../Core/Src/main.c:412:6:Error_Handler	1

@@ -42,8 +42,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
-TIM_HandleTypeDef htim1;
 ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
+TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 static uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,}; // Массив каналов ADC1/CH1, CH2, CH3
@@ -55,7 +55,6 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_ADC1_Init(void);
-uint32_t counterMAX;
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -99,12 +98,10 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim1);
-  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch, ADC_CHANNELS_NUM); // Запускаем DMA для ADC1
   __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 7999); // Записываем значение в регистр сравнения
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start_IT(&htim1, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -328,7 +325,6 @@ static void MX_TIM1_Init(void)
   /* USER CODE BEGIN TIM1_Init 2 */
 
   /* USER CODE END TIM1_Init 2 */
-  HAL_TIM_MspPostInit(&htim1);
 
 }
 
@@ -364,7 +360,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -394,7 +389,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
+/*void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
     		if (valueADC_ch[0] >= AnalogWDGConfig.HighThreshold
     				|| valueADC_ch[0] <= AnalogWDGConfig.LowThreshold) {
@@ -402,9 +397,9 @@ void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     		}
             __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
     }
-}
-void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
-	if(htim->Instance == TIM1){
+}*/
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
 		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 	}
 }
