@@ -32,6 +32,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define ADC_CHANNELS_NUM 3 // Каналы ADC
+#define THRESHOLD 2200
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,7 +47,7 @@ ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
 TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
-static uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,}; // Массив каналов ADC1/CH1, CH2, CH3
+uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,}; // Массив каналов ADC1/CH1, CH2, CH3
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,6 +56,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_ADC1_Init(void);
+void Process_ADC_Channel(TIM_HandleTypeDef* htim, uint16_t* valueADC_ch, uint16_t val);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -98,9 +100,7 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim1);
-
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch, ADC_CHANNELS_NUM); // Запускаем DMA для ADC1
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 7999); // Записываем значение в регистр сравнения
   HAL_TIM_PWM_Start_IT(&htim1, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
@@ -208,8 +208,8 @@ static void MX_ADC1_Init(void)
   /** Configure the analog watchdog
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
-  AnalogWDGConfig.HighThreshold = 2200;
-  AnalogWDGConfig.LowThreshold = 24;
+  AnalogWDGConfig.HighThreshold = 2390;
+  AnalogWDGConfig.LowThreshold = 2200 ;
   AnalogWDGConfig.ITMode = ENABLE;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
@@ -389,19 +389,25 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-/*void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
-    if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
-    		if (valueADC_ch[0] >= AnalogWDGConfig.HighThreshold
-    				|| valueADC_ch[0] <= AnalogWDGConfig.LowThreshold) {
-    			reset_timer(&htim1);
-    		}
-            __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
-    }
-}*/
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
-		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 1);
+
+		__HAL_TIM_SET_COUNTER(htim, 0);
+		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, 1000);
+		HAL_TIM_OC_Start_IT(htim, TIM_CHANNEL_2);
 	}
+	else if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 0);
+		HAL_TIM_OC_Stop_IT(htim, TIM_CHANNEL_2);
+	}
+}
+
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
+    if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
+    			Process_ADC_Channel(&htim1, valueADC_ch, THRESHOLD);
+            __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
+    }
 }
 /* USER CODE END 4 */
 

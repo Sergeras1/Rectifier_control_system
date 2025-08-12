@@ -5,4 +5,6 @@
 
 extern void reset_timer(TIM_HandleTypeDef* htim);
 
+extern uint32_t counterMAX;
+
 #endif /* INC_TIMER_UTILS_H_ */
