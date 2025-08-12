@@ -7,11 +7,6 @@ static uint8_t front_type = 0;
 static uint16_t current_value = 0;
 static uint16_t timer_val = 0;
 
-void reset_timer(TIM_HandleTypeDef* htim){
-	counterMAX = __HAL_TIM_GET_COUNTER(htim);
-	__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, counterMAX); // Записываем значение в регистр сравнения
-	__HAL_TIM_SET_COUNTER(htim, 0);
-}
 // Функция нахождения порога синусоиды и сброса таймера
 void Process_ADC_Channel(TIM_HandleTypeDef* htim, uint16_t* valueADC_ch, uint16_t val){
 	//for(int i = 0; i < ADC_CHANNELS_NUM; ++i){}
@@ -23,7 +18,7 @@ void Process_ADC_Channel(TIM_HandleTypeDef* htim, uint16_t* valueADC_ch, uint16_
 		__HAL_TIM_SET_COUNTER(htim, 0); // Сбрасываем регистр
 	}
 	else if (adc_value >= val && current_value < val){ // Ловим задемй фронт
-		front_type = 2;
+		front_type = 0;
 		timer_val = __HAL_TIM_GET_COUNTER(htim);
 		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, timer_val);
 		__HAL_TIM_SET_COUNTER(htim, 0);

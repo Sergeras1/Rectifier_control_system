@@ -1,2 +1,1 @@
-../Core/Src/timer_utils.c:10:6:reset_timer	16	static
-../Core/Src/timer_utils.c:18:6:Process_ADC_Channel	24	static
+../Core/Src/timer_utils.c:11:6:Process_ADC_Channel	24	static
