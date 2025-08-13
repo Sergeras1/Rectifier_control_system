@@ -207,7 +207,7 @@ static void MX_ADC1_Init(void)
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
   AnalogWDGConfig.HighThreshold = 2200;
-  AnalogWDGConfig.LowThreshold = 24;
+  AnalogWDGConfig.LowThreshold = 2400;
   AnalogWDGConfig.ITMode = ENABLE;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
@@ -294,7 +294,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 18000;
+  sConfigOC.Pulse = 1000;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -388,6 +388,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
+
 	if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 1);
 
@@ -395,6 +396,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
 		uint16_t now = __HAL_TIM_GET_COUNTER(htim);
 		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, now + 1200);
 		HAL_TIM_OC_Start_IT(htim, TIM_CHANNEL_2);
+
 	}
 	else if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 0);
@@ -404,7 +406,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
 
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
-    			Process_ADC_Channel(&htim1, valueADC_ch, THRESHOLD);
+    		Process_ADC_Channel(&htim1, valueADC_ch, THRESHOLD);
             __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
     }
 }

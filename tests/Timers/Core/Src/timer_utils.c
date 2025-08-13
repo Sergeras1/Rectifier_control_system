@@ -15,13 +15,13 @@ void Process_ADC_Channel(TIM_HandleTypeDef* htim, uint16_t* valueADC_ch, uint16_
 		front_type = true; // Устанавливаем тип фронта
 		timer_val = __HAL_TIM_GET_COUNTER(htim); // Получаем значение
 		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, timer_val);// Фиксируем значение в регистр перед сбросом
-		__HAL_TIM_SET_COUNTER(htim, 0); // Сбрасываем регистр
+		//__HAL_TIM_SET_COUNTER(htim, 0); // Сбрасываем регистр
 	}
 	else if (adc_value >= val && current_value < val){ // Ловим задний фронт
 		front_type = 0;
 		timer_val = __HAL_TIM_GET_COUNTER(htim);
 		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, timer_val);
-		__HAL_TIM_SET_COUNTER(htim, 0);
+		//__HAL_TIM_SET_COUNTER(htim, 0);
 	}
 	adc_value = current_value;
 }
