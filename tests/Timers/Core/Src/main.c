@@ -394,19 +394,22 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
 
 		//__HAL_TIM_SET_COUNTER(htim, 0);
 		uint16_t now = __HAL_TIM_GET_COUNTER(htim);
-		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, now + 1200);
+		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, now + 1200); // Длительность верхнего полупериода
 		HAL_TIM_OC_Start_IT(htim, TIM_CHANNEL_2);
 
 	}
 	else if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2){
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 0);
 		HAL_TIM_OC_Stop_IT(htim, TIM_CHANNEL_2);
+		uint16_t now = __HAL_TIM_GET_COUNTER(htim);
+		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, now + 12000); //Длительность нижнего полупериод
+		HAL_TIM_OC_Start_IT(htim, TIM_CHANNEL_1);
 	}
 }
 
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
-    		Process_ADC_Channel(&htim1, valueADC_ch, THRESHOLD);
+    		//Process_ADC_Channel(&htim1, valueADC_ch, THRESHOLD);
             __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
     }
 }
