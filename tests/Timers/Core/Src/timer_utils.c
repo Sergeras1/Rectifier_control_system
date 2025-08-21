@@ -5,59 +5,101 @@
 uint16_t adc_value = 0;
 bool half_wave_Condition = false; // true - нарастающий полупериод, false - падающий полупериод
 uint16_t current_value = 0;
-const static uint16_t ange_alpha = 45;
+
+uint16_t R_CmpAB_T;
+uint16_t R_CmpAB_Y;
 uint16_t count_reset = 0;
-uint16_t R_CmpAB = 45;
 
 /** II. TIM1 **/
-void process_ADC_Channel(TIM_HandleTypeDef* htim, uint16_t* valueADC_ch, uint16_t val){
-	//for(int i = 0; i < ADC_CHANNELS_NUM; ++i){} - Позже буду использовать цикл, чтобы проходить по всем каналам
-	current_value = valueADC_ch[0];
-	if(adc_value < val && current_value >=val){ // Ловим передний фронт
-		uint16_t timer_val = 0;
-		timer_val = __HAL_TIM_GET_COUNTER(htim); // Зафиксировали значение перед сбросом
-		__HAL_TIM_SET_COUNTER(htim, 0); // Сбрасываем регистр
-		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, timer_val);// Записали состояние фронта, который сформировал таймер
+void start_Tim6(TIM_HandleTypeDef* htim1, TIM_HandleTypeDef* htim6){
+	current_value = __HAL_TIM_GET_COUNTER(htim1);
+	if(current_value >= R_CmpAB_T){
+	// Установить выход Out_AB
+	R_CmpAB_Y = (count_reset * 75) / 180;
+	__HAL_TIM_SET_COMPARE(htim1, TIM_CHANNEL_1, R_CmpAB_Y);
+	}
 
+	for (int i = 0; i < size; ++i) {
+		if (valueADC_ch[i] >= AnalogWDGConfig->HighThreshold) {
+			current_state = 1;
+		}
+		else if (valueADC_ch[i] <= AnalogWDGConfig->LowThreshold) {
+			current_state = 0;
+		}
+		else {
+			current_value = prev_state[i];
+		}
+
+		//Фиксируем фронтов
+		if(prev_state[i] == 0 && current_state == 1){
+			half_wave_Condition = true;
+		}
+		else if(prev_state[i] == 1 && count_reset == 0){
+			half_wave_Condition = false;
+		}
+
+		prev_state[i] = current_state;
 	}
-	else if (adc_value >= val && current_value < val){ // Ловим задний фронт
-		uint16_t timer_val = 0;
-		timer_val = __HAL_TIM_GET_COUNTER(htim);
-		__HAL_TIM_SET_COUNTER(htim, 0);
-		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, timer_val);
-	}
-	adc_value = current_value;
+
+	HAL_TIM_Base_Start_IT(htim6);
 }
 /** I. WatchDog **/
-void checkChanelns(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig, uint16_t* valueADC_ch, uint16_t size){
+void checkChanelns(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig,
+				   TIM_HandleTypeDef* htim,
+				   uint16_t* valueADC_ch,
+				   uint16_t size){
+	static uint8_t prev_state[3] = {0};
+	uint8_t current_state;
+
+	// 1. Фиксируем значение счетчика
+	count_reset = __HAL_TIM_GET_COUNTER(htim);
+
+	// 2. Вычисления для R_CmpAB_T
+	R_CmpAB_T = (count_reset * 45) / 180;
+	if(R_CmpAB_T < htim->Instance->ARR){
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, R_CmpAB_T);
+	}
+	// Сброс счетчика
+	//__HAL_TIM_SET_COUNTER(htim, 0);
+	// 3. Анализ каналов АЦП
 	for (int i = 0; i < size; ++i) {
-		if (valueADC_ch[i] <= AnalogWDGConfig->HighThreshold) {
+		if (valueADC_ch[i] >= AnalogWDGConfig->HighThreshold) {
 			switch(i) {
 			case 0: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
 				break;
 			case 1: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
 				break;
-			case 2: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 0);
+			case 2: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 0);
 				break;
 			}
-			half_wave_Condition = true; // Запоминаем состояние полуволны
+				current_state = 1;
 		}
-		else if (valueADC_ch[i] >= AnalogWDGConfig->LowThreshold) {
+		else if (valueADC_ch[i] <= AnalogWDGConfig->LowThreshold) {
 			switch(i) {
 			case 0: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
 				break;
 			case 1: HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 1);
 				break;
-			case 2: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, 1);
+			case 2: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 1);
 				break;
 			}
+			current_state = 0;
+		}
+		else {
+			current_value = prev_state[i];
+		}
+
+		//Фиксируем фронтов
+		if(prev_state[i] == 0 && current_state == 1){
+			half_wave_Condition = true;
+		}
+		else if(prev_state[i] == 1 && count_reset == 0){
 			half_wave_Condition = false;
 		}
+
+		prev_state[i] = current_state;
 	}
-	//R_CmpAB = (count_reset / 180) * ange_alpha;
-	if(R_CmpAB > TIM1->ARR){
-		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, R_CmpAB);
-	}
+
 }
 
 

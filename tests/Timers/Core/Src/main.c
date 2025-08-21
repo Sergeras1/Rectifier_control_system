@@ -50,7 +50,7 @@ TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN PV */
 uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,}; // Массив каналов ADC1/CH1, CH2, CH3
-static uint16_t value = 0;
+volatile uint16_t value = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,8 +62,9 @@ static void MX_ADC1_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void process_ADC_Channel(TIM_HandleTypeDef* htim, uint16_t* valueADC_ch, uint16_t val);
-void checkChanelns(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig, uint16_t* valueADC_ch, uint16_t size);
+void start_Tim6(TIM_HandleTypeDef* htim1, TIM_HandleTypeDef* htim6);
+void checkChanelns(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig,TIM_HandleTypeDef* htim,
+		uint16_t* valueADC_ch, uint16_t size);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -195,7 +196,7 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
-  ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
+
   ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
@@ -288,7 +289,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 74;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 36000;
+  htim1.Init.Period = 35999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -358,11 +359,11 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 73;
+  htim2.Init.Prescaler = 74;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 35999;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
@@ -404,7 +405,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 74;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 36000;
+  htim6.Init.Period = 1200;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -458,17 +459,27 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_14, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PB0 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  /*Configure GPIO pins : PB0 PB14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_14;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PA8 PA9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PG14 */
   GPIO_InitStruct.Pin = GPIO_PIN_14;
@@ -485,17 +496,13 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	/** II. TIM1 **/
-	if(htim->Instance == TIM1){
-		process_ADC_Channel(&htim1, valueADC_ch, THRESHOLD);  // Анализ импольсов синхронизации
-		//__HAL_TIM_SET_COUNTER(&htim6, 0);
-		//HAL_TIM_Base_Start_IT(&htim6); // Запускаем 6-й таймер
-
-	}
 	/** III. TIM6 **/
-//	if(htim->Instance == TIM6){
-//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 0);
-//	}
+	if(htim->Instance == TIM6){
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 0);
+		HAL_TIM_Base_Stop_IT(&htim6);
+	}
 
 	/** IV. TIM2 **/
 	if(htim->Instance == TIM2){
@@ -507,9 +514,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
     	/** I. WatchDog **/
-		//checkChanelns(&AnalogWDGConfig, valueADC_ch, ADC_CHANNELS_NUM);
+		checkChanelns(&AnalogWDGConfig,&htim1, valueADC_ch, ADC_CHANNELS_NUM);
 		__HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
     }
+}
+
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
+		//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 1);
+//		R_CmpAB_Y = (count_reset * 75) / 180;
+//		if(current_value >= R_CmpAB_T){
+//			__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, R_CmpAB_Y);
+//			}
+			HAL_TIM_Base_Start_IT(&htim6);
+	}
 }
 /* USER CODE END 4 */
 
