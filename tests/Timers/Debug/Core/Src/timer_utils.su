@@ -1,1 +1,2 @@
-../Core/Src/timer_utils.c:10:6:Process_ADC_Channel	32	static
+../Core/Src/timer_utils.c:13:6:process_ADC_Channel	32	static
+../Core/Src/timer_utils.c:32:6:checkChanelns	32	static
