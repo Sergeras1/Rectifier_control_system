@@ -1,2 +1,2 @@
-../Core/Src/timer_utils.c:15:6:start_Tim6	16	static
-../Core/Src/timer_utils.c:25:6:checkChanelns	32	static
+../Core/Src/timer_utils.c:14:6:StartPulseSequence	32	static
+../Core/Src/timer_utils.c:24:6:UpdatePhaseAngleControl	32	static

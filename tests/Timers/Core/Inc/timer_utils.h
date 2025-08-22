@@ -15,5 +15,6 @@ extern uint16_t R_CmpAB_Y;
 extern uint16_t count_reset; // Состоение счетчика в момент сброса
 extern uint16_t count_max;	// Максимальное значение счетчика
 extern uint16_t count_AB;
+extern uint16_t valueADC_ch[];
 
 #endif /* INC_TIMER_UTILS_H_ */

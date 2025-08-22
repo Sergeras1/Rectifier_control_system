@@ -63,8 +63,9 @@ static void MX_TIM6_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void start_Tim6(TIM_HandleTypeDef* htim1, TIM_HandleTypeDef* htim6);
-void checkChanelns(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig,TIM_HandleTypeDef* htim,
+void UpdatePhaseAngleControl(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig,TIM_HandleTypeDef* htim,
 		uint16_t* valueADC_ch, uint16_t size);
+void StartPulseSequence(TIM_HandleTypeDef* htim1, TIM_HandleTypeDef* htim6, uint16_t size);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -109,14 +110,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&valueADC_ch, ADC_CHANNELS_NUM); // Запускаем DMA для ADC1
 
-  HAL_NVIC_SetPriority(TIM1_CC_IRQn, 0, 0);
-  HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
-
-  HAL_NVIC_EnableIRQ(TIM2_IRQn);
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_PWM_Start_IT(&htim1, TIM_CHANNEL_1);
-
-  HAL_TIM_Base_Start_IT(&htim2);
 
   /* USER CODE END 2 */
 
@@ -419,7 +414,6 @@ static void MX_TIM6_Init(void)
   }
   /* USER CODE BEGIN TIM6_Init 2 */
 
-  HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END TIM6_Init 2 */
 
 }
@@ -498,10 +492,9 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	/** III. TIM6 **/
 	if(htim->Instance == TIM6){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 0);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, 0);
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 0);
-		HAL_TIM_Base_Stop_IT(&htim6);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8 | GPIO_PIN_9, 1);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 1);
+		//HAL_TIM_Base_Stop_IT(&htim6);
 	}
 
 	/** IV. TIM2 **/
@@ -514,19 +507,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
     	/** I. WatchDog **/
-		checkChanelns(&AnalogWDGConfig,&htim1, valueADC_ch, ADC_CHANNELS_NUM);
+    	UpdatePhaseAngleControl(&AnalogWDGConfig,&htim1, valueADC_ch, ADC_CHANNELS_NUM);
 		__HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
     }
 }
 
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
-	if(htim->Instance == TIM1 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1){
-		//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, 1);
-//		R_CmpAB_Y = (count_reset * 75) / 180;
-//		if(current_value >= R_CmpAB_T){
-//			__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_2, R_CmpAB_Y);
-//			}
-			HAL_TIM_Base_Start_IT(&htim6);
+	if(htim->Instance == TIM1){
+		/** II. TIM1 **/
+	uint16_t tim1_value = __HAL_TIM_GET_COUNTER(htim);
+		if(tim1_value >= R_CmpAB_T){
+			StartPulseSequence(&htim1, &htim6, ADC_CHANNELS_NUM);
+		}
 	}
 }
 /* USER CODE END 4 */
