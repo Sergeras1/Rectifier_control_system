@@ -492,9 +492,9 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	/** III. TIM6 **/
 	if(htim->Instance == TIM6){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8 | GPIO_PIN_9, 1);
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 1);
-		//HAL_TIM_Base_Stop_IT(&htim6);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8 | GPIO_PIN_9, 0);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 0);
+		HAL_TIM_Base_Stop_IT(&htim6);
 	}
 
 	/** IV. TIM2 **/
@@ -516,9 +516,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim->Instance == TIM1){
 		/** II. TIM1 **/
 	uint16_t tim1_value = __HAL_TIM_GET_COUNTER(htim);
-		if(tim1_value >= R_CmpAB_T){
+		//if(tim1_value >= R_CmpAB_T){
 			StartPulseSequence(&htim1, &htim6, ADC_CHANNELS_NUM);
-		}
+		//}
 	}
 }
 /* USER CODE END 4 */

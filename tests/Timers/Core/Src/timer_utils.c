@@ -14,8 +14,8 @@ uint16_t count_reset;
 void StartPulseSequence(TIM_HandleTypeDef* htim1, TIM_HandleTypeDef* htim6, uint16_t size){
 	uint16_t tim1_value = __HAL_TIM_GET_COUNTER(htim1);
 	if(half_wave_Condition == true){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8 | GPIO_PIN_9, 0);
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 0);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8 | GPIO_PIN_9, 1);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 1);
 	}
 	R_CmpAB_Y = (count_reset * 75) / 180;
 	HAL_TIM_Base_Start_IT(htim6);
@@ -36,7 +36,7 @@ void UpdatePhaseAngleControl(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig,
 		__HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, R_CmpAB_T);
 	}
 	// Сброс счетчика
-	__HAL_TIM_SET_COUNTER(htim, 0);
+	//__HAL_TIM_SET_COUNTER(htim, 0);
 
 	// 3. Анализ каналов АЦП
 	for (int i = 0; i < size; ++i) {
