@@ -31,7 +31,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ADC_CHANNELS_NUM 3 // Каналы ADC
 #define THRESHOLD 2200
 /* USER CODE END PD */
 
@@ -49,8 +48,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN PV */
-uint16_t valueADC_ch[ADC_CHANNELS_NUM] = {0,}; // Массив каналов ADC1/CH1, CH2, CH3
-volatile uint16_t value = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,8 +61,10 @@ static void MX_TIM6_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void start_Tim6(TIM_HandleTypeDef* htim1, TIM_HandleTypeDef* htim6);
-void UpdatePhaseAngleControl(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig,TIM_HandleTypeDef* htim,
-		uint16_t* valueADC_ch, uint16_t size);
+void UpdatePhaseAngleControl(ADC_AnalogWDGConfTypeDef* AnalogWDGConfig,
+							 TIM_HandleTypeDef* htim,
+							 uint16_t* valueADC_ch,
+							 uint16_t size);
 void StartPulseSequence(TIM_HandleTypeDef* htim1, TIM_HandleTypeDef* htim6, uint16_t size);
 /* USER CODE END PFP */
 
@@ -220,8 +220,8 @@ static void MX_ADC1_Init(void)
   /** Configure the analog watchdog
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
-  AnalogWDGConfig.HighThreshold = 2200;
-  AnalogWDGConfig.LowThreshold = 2100;
+  AnalogWDGConfig.HighThreshold = 2800;
+  AnalogWDGConfig.LowThreshold = 1200;
   AnalogWDGConfig.ITMode = ENABLE;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
@@ -284,7 +284,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 74;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 35999;
+  htim1.Init.Period = 47999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -308,7 +308,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
+  sConfigOC.Pulse = 1;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -400,7 +400,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 74;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 1200;
+  htim6.Init.Period = 1199;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -496,17 +496,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 0);
 		HAL_TIM_Base_Stop_IT(&htim6);
 	}
-
-	/** IV. TIM2 **/
-	if(htim->Instance == TIM2){
-		value = __HAL_TIM_GET_COUNTER(&htim2);
-	}
-
 }
 
 void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
     if (hadc == &hadc1 && __HAL_ADC_GET_FLAG(hadc, ADC_FLAG_AWD)) {
-    	/** I. WatchDog **/
+    /** I. WatchDog **/
     	UpdatePhaseAngleControl(&AnalogWDGConfig,&htim1, valueADC_ch, ADC_CHANNELS_NUM);
 		__HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_AWD);
     }
@@ -514,11 +508,8 @@ void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc) {
 
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim->Instance == TIM1){
-		/** II. TIM1 **/
-	uint16_t tim1_value = __HAL_TIM_GET_COUNTER(htim);
-		//if(tim1_value >= R_CmpAB_T){
-			StartPulseSequence(&htim1, &htim6, ADC_CHANNELS_NUM);
-		//}
+	/** II. TIM1 **/
+	StartPulseSequence(&htim1, &htim6, ADC_CHANNELS_NUM);
 	}
 }
 /* USER CODE END 4 */
