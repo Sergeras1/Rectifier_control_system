@@ -7,6 +7,6 @@
 ../Core/Src/main.c:424:13:MX_DMA_Init	1
 ../Core/Src/main.c:442:13:MX_GPIO_Init	1
 ../Core/Src/main.c:492:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:501:6:HAL_ADC_LevelOutOfWindowCallback	3
-../Core/Src/main.c:509:6:HAL_TIM_OC_DelayElapsedCallback	2
-../Core/Src/main.c:521:6:Error_Handler	1
+../Core/Src/main.c:503:6:HAL_ADC_LevelOutOfWindowCallback	3
+../Core/Src/main.c:511:6:HAL_TIM_OC_DelayElapsedCallback	2
+../Core/Src/main.c:523:6:Error_Handler	1

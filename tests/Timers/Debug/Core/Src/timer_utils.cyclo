@@ -1,2 +1,2 @@
-../Core/Src/timer_utils.c:16:6:StartPulseSequence	2
-../Core/Src/timer_utils.c:27:6:UpdatePhaseAngleControl	9
+../Core/Src/timer_utils.c:16:6:StartPulseSequence	3
+../Core/Src/timer_utils.c:29:6:UpdatePhaseAngleControl	9

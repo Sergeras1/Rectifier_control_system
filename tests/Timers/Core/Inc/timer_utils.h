@@ -19,5 +19,6 @@ extern uint16_t count_reset;
 extern uint16_t count_max;
 extern uint16_t count_AB;
 extern uint16_t current_value;
+extern uint8_t current_state;
 
 #endif /* INC_TIMER_UTILS_H_ */

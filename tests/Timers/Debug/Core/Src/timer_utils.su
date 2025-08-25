@@ -1,2 +1,2 @@
 ../Core/Src/timer_utils.c:16:6:StartPulseSequence	32	static
-../Core/Src/timer_utils.c:27:6:UpdatePhaseAngleControl	32	static
+../Core/Src/timer_utils.c:29:6:UpdatePhaseAngleControl	32	static

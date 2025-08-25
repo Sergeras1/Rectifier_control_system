@@ -220,8 +220,8 @@ static void MX_ADC1_Init(void)
   /** Configure the analog watchdog
   */
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_ALL_REG;
-  AnalogWDGConfig.HighThreshold = 2800;
-  AnalogWDGConfig.LowThreshold = 1200;
+  AnalogWDGConfig.HighThreshold = 2200;
+  AnalogWDGConfig.LowThreshold = 1900;
   AnalogWDGConfig.ITMode = ENABLE;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
@@ -282,9 +282,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 74;
+  htim1.Init.Prescaler = 200; //74 1799
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 47999;
+  htim1.Init.Period = 8999; // 47999 1999
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -308,7 +308,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 1;
+  sConfigOC.Pulse = 10;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -398,9 +398,9 @@ static void MX_TIM6_Init(void)
 
   /* USER CODE END TIM6_Init 1 */
   htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 74;
+  htim6.Init.Prescaler = 179;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 1199;
+  htim6.Init.Period = 499;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -495,6 +495,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8 | GPIO_PIN_9, 0);
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 0);
 		HAL_TIM_Base_Stop_IT(&htim6);
+
+		//StartPulseSequence(&htim1, &htim6, ADC_CHANNELS_NUM);
 	}
 }
 
